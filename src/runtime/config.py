@@ -170,6 +170,18 @@ USE_OFFICIAL_TRANSCRIPT = (
     os.environ.get("USE_OFFICIAL_TRANSCRIPT", "").strip().lower()
     in ("1", "true", "yes")
 )
+OFFICIAL_TRANSCRIPT_COURSE_IDS = {
+    course_id.strip()
+    for course_id in os.environ.get("OFFICIAL_TRANSCRIPT_COURSE_IDS", "").split(",")
+    if course_id.strip()
+}
+
+
+def use_official_transcript_for(course_id: str) -> bool:
+    """Use a course allowlist when configured; otherwise keep the old switch."""
+    if OFFICIAL_TRANSCRIPT_COURSE_IDS:
+        return str(course_id) in OFFICIAL_TRANSCRIPT_COURSE_IDS
+    return USE_OFFICIAL_TRANSCRIPT
 
 # 监控的课程 ID 列表
 COURSE_IDS = [

@@ -8,9 +8,9 @@ on:
         required: true
         type: string
       use_official_transcript:
-        description: "Use official iCourse transcripts instead of ASR"
+        description: "Use official transcripts for Quantum Mechanics I (37677) only"
         required: false
-        default: false
+        default: true
         type: boolean
 
 permissions:
@@ -162,7 +162,7 @@ jobs:
           StuId: ${{ secrets.STUID }}
           UISPsw: ${{ secrets.UISPSW }}
           COURSE_IDS: ${{ inputs.course_ids }}
-          USE_OFFICIAL_TRANSCRIPT: ${{ inputs.use_official_transcript && '1' || '' }}
+          OFFICIAL_TRANSCRIPT_COURSE_IDS: ${{ inputs.use_official_transcript && '37677' || '' }}
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}

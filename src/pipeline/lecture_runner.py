@@ -196,10 +196,10 @@ class LectureRunner:
         # until a download slot frees.
         self._scheduler.prefetch_lecture(
             self._client, next_course, next_sub,
-            audio=self._needs_audio(next_sub),
+            audio=self._needs_audio(next_course, next_sub),
         )
 
-    def _needs_audio(self, sub_id: str) -> bool:
+    def _needs_audio(self, course_id: str, sub_id: str) -> bool:
         """False when transcription won't need the audio stream: a cached
         transcript exists, or the official transcript looks usable.  Keeps
         prefetching from spending a download slot (and a full lecture of
@@ -207,7 +207,7 @@ class LectureRunner:
         existing = self._db.get_lecture(sub_id)
         if existing and existing.get("transcript"):
             return False
-        if config.USE_OFFICIAL_TRANSCRIPT:
+        if config.use_official_transcript_for(course_id):
             try:
                 segments = self._client.get_transcript_segments(sub_id)
                 # No tail hint at prefetch time — the lecture's PPT rows
@@ -265,7 +265,7 @@ class LectureRunner:
             return existing["transcript"], None
 
         # Try official transcript before firing up ASR (config-gated).
-        if config.USE_OFFICIAL_TRANSCRIPT:
+        if config.use_official_transcript_for(course_id):
             try:
                 official = self._official_cache.pop(sub_id, None)
                 if official is None:
