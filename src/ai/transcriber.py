@@ -600,9 +600,9 @@ class Transcriber:
                     f"ffmpeg exited (rc={ffmpeg_proc.returncode}) before "
                     f"writing audio file {audio_path}.\nstderr:\n{stderr_text}"
                 )
-            if time.time() - t_wait > 60:
+            if time.time() - t_wait > 120:
                 raise TimeoutError(
-                    f"ffmpeg did not create {audio_path} within 60 s"
+                    f"ffmpeg did not create {audio_path} within 120 s"
                 )
             time.sleep(0.1)
 

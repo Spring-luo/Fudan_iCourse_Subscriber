@@ -165,7 +165,7 @@ VIDEO_DOWNLOAD_CONCURRENCY = int(
     os.environ.get("VIDEO_DOWNLOAD_CONCURRENCY", "2")
 )
 
-# 是否优先使用 iCourse 官方字幕（跳过 ASR 转录）。默认关闭。
+# 音频提取失败时是否回退到 iCourse 官方字幕。默认关闭。
 USE_OFFICIAL_TRANSCRIPT = (
     os.environ.get("USE_OFFICIAL_TRANSCRIPT", "").strip().lower()
     in ("1", "true", "yes")
@@ -178,7 +178,7 @@ OFFICIAL_TRANSCRIPT_COURSE_IDS = {
 
 
 def use_official_transcript_for(course_id: str) -> bool:
-    """Use a course allowlist when configured; otherwise keep the old switch."""
+    """Allow official-subtitle fallback for selected or all courses."""
     if OFFICIAL_TRANSCRIPT_COURSE_IDS:
         return str(course_id) in OFFICIAL_TRANSCRIPT_COURSE_IDS
     return USE_OFFICIAL_TRANSCRIPT

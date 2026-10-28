@@ -167,8 +167,8 @@ jobs:
           StuId: ${{ secrets.STUID }}
           UISPsw: ${{ secrets.UISPSW }}
           COURSE_IDS: ${{ secrets.COURSE_IDS }}
-          # Quantum Mechanics I uses official transcripts; other courses keep ASR.
-          OFFICIAL_TRANSCRIPT_COURSE_IDS: "37677"
+          # Try video audio first, then official subtitles if audio fails.
+          USE_OFFICIAL_TRANSCRIPT: "1"
           CRAWL_TERM: ${{ secrets.CRAWL_TERM }}
           SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
