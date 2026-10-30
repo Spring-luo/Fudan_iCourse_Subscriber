@@ -37,6 +37,15 @@ MODEL_PROVIDERS: list[dict] = [
         ],
     },
     {
+        "name": "shusheng",
+        "api_key_env": "SHUSHENG_API_KEY",
+        "base_url_env": "SHUSHENG_BASE_URL",
+        "default_base_url": "https://discovery-api.intern-ai.org.cn/v1",
+        "models": [
+            "deepseek-v4.1-flash-1017"
+        ],
+    },
+    {
         "name": "deepseek",
         "api_key_env": "DEEPSEEK_API_KEY",
         "base_url_env": "DEEPSEEK_BASE_URL",
