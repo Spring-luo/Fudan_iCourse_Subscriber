@@ -37,13 +37,14 @@
 | `UISPSW` | ✅ | UIS 统一身份认证密码 | `your_password` |
 | `COURSE_IDS` | ✅ | 要监控的课程 ID，多个用英文逗号分隔 | `35472,30251` |
 | `DASHSCOPE_API_KEY` | ⬜ | ModelScope 平台 API Key | `ms-xxxxxxxx` |
+| `SHUSHENG_API_KEY` | ⬜ | 书生·端砚API Key | `your-api-key` |
 | `DEEPSEEK_API_KEY` | ⬜ | DeepSeek API Key（推荐） | `sk-xxxxxxxx` |
 | `GEMINI_API_KEY` | ⬜ | Gemini API Key | `AIza...` |
 | `SMTP_EMAIL` | ✅ | 用于发送邮件的 QQ 邮箱 | `123456@qq.com` |
 | `SMTP_PASSWORD` | ✅ | QQ 邮箱 SMTP **授权码**（不是登录密码） | `abcdefghijklmnop` |
 | `RECEIVER_EMAIL` | ✅ | 接收摘要邮件的邮箱 | `you@m.fudan.edu.com` |
 
-> 至少配置一个 LLM API Key（DASHSCOPE、DEEPSEEK 或 GEMINI）。程序按配置顺序自动回退尝试。如果需要选择其他的LLM供应商，可以在`src\runtime\config.py`路径下自定义供应商。
+> 至少配置一个LLM API Key（DASHSCOPE、SHUSHENG、DEEPSEEK或GEMINI）。程序按配置顺序自动回退尝试。如果需要选择其他的LLM供应商，可以在`src\runtime\config.py`路径下自定义供应商。
 
 ### 第 3 步：获取课程 ID
 
@@ -60,6 +61,7 @@
 | 服务商 | 获取方式 | 免费额度 |
 |---|---|---|
 | **ModelScope**（`DASHSCOPE_API_KEY`） | [API 密钥管理](https://modelscope.cn/my/myaccesstoken) | 每天 2000 次免费调用，推荐 |
+| **书生·端砚**（`SHUSHENG_API_KEY`） | [API Key管理](https://discovery.intern-ai.org.cn/token-plan/home?tabIndex=3&dockey=02-get-and-select-model.md) | 以平台当前额度为准 |
 | **DeepSeek**（`DEEPSEEK_API_KEY`） | [DeepSeek Platform](https://platform.deepseek.com/) | 注册赠额度 |
 | **Gemini**（`GEMINI_API_KEY`） | [Google AI Studio](https://aistudio.google.com/) | flash模型每日免费额度 |
 
