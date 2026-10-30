@@ -166,7 +166,7 @@ jobs:
         env:
           StuId: ${{ secrets.STUID }}
           UISPsw: ${{ secrets.UISPSW }}
-          COURSE_IDS: ${{ secrets.COURSE_IDS }}
+          COURSE_IDS: ${{ secrets.COURSE_IDS }},38488
           # Try video audio first, then official subtitles if audio fails.
           USE_OFFICIAL_TRANSCRIPT: "1"
           CRAWL_TERM: ${{ secrets.CRAWL_TERM }}
@@ -188,12 +188,12 @@ jobs:
         env:
           STUID: ${{ secrets.STUID }}
           UISPSW: ${{ secrets.UISPSW }}
-          COURSE_IDS: ${{ secrets.COURSE_IDS }}
+          COURSE_IDS: ${{ secrets.COURSE_IDS }},38488
           # Persisted by the sharder into meta('subscribed_course_ids')
           # so single_run.yml / delete_course.yml (which run with a
           # different or no COURSE_IDS) still know the user's real
           # subscription and don't reclassify everything as cold.
-          SUBSCRIBED_COURSE_IDS: ${{ secrets.COURSE_IDS }}
+          SUBSCRIBED_COURSE_IDS: ${{ secrets.COURSE_IDS }},38488
           DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
