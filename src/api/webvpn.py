@@ -305,7 +305,17 @@ class WebVPNSession:
 
         login_token = data.get("loginToken", "")
         if not login_token:
-            raise RuntimeError("No loginToken in iCourse CAS response")
+            # Keep diagnostics structural: never log tokens, account data, or
+            # the response body.  This distinguishes a changed response
+            # schema from an authentication rejection on the next run.
+            nested = data.get("data")
+            raise RuntimeError(
+                "No loginToken in iCourse CAS response "
+                f"(http={resp.status_code}, code={data.get('code')}, "
+                f"fields={sorted(str(key)[:32] for key in data)[:16]}, "
+                f"data_type={type(nested).__name__}, "
+                f"data_fields={sorted(str(key)[:32] for key in nested)[:16] if isinstance(nested, dict) else []})"
+            )
         print("    loginToken: OK")
 
         # Step 6: Get CAS ticket (through WebVPN)
