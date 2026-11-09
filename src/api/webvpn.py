@@ -20,6 +20,25 @@ import base64
 from src.runtime import config
 
 
+class SecondFactorRequiredError(RuntimeError):
+    """The identity provider accepted the password but requires MFA."""
+
+
+def _login_token_or_raise(data: dict, service: str) -> str:
+    """Return a CAS token or distinguish MFA from other token failures."""
+    token = data.get("loginToken")
+    if token:
+        return str(token)
+    if str(data.get("code")) == "200" and (
+        str(data.get("pageLevelNo")) == "2" or bool(data.get("second"))
+    ):
+        raise SecondFactorRequiredError(
+            f"{service} requires second-factor authentication "
+            "(TOTP, email, SMS, or QR). Password retries cannot complete it."
+        )
+    raise RuntimeError(f"No loginToken in {service} response")
+
+
 def encrypt_host(hostname: str) -> str:
     """Encrypt hostname using AES-128-CFB for WebVPN URL encoding.
 
@@ -303,9 +322,7 @@ class WebVPNSession:
                 f"iCourse CAS auth failed (code={data.get('code')})"
             )
 
-        login_token = data.get("loginToken", "")
-        if not login_token:
-            raise RuntimeError("No loginToken in iCourse CAS response")
+        login_token = _login_token_or_raise(data, "iCourse CAS")
         print("    loginToken: OK")
 
         # Step 6: Get CAS ticket (through WebVPN)
@@ -527,10 +544,7 @@ class WebVPNSession:
                 f"Authentication failed (code={data.get('code')})"
             )
 
-        # loginToken is at top level, not nested under "data"
-        login_token = data.get("loginToken", "")
-        if not login_token:
-            raise RuntimeError("No loginToken in response")
+        login_token = _login_token_or_raise(data, "WebVPN CAS")
 
         print("    loginToken: OK")
         return login_token
