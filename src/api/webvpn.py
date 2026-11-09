@@ -309,10 +309,15 @@ class WebVPNSession:
             # the response body.  This distinguishes a changed response
             # schema from an authentication rejection on the next run.
             nested = data.get("data")
+            page_level = data.get("pageLevelNo")
+            modules = data.get("moduleCodes")
             raise RuntimeError(
                 "No loginToken in iCourse CAS response "
                 f"(http={resp.status_code}, code={data.get('code')}, "
                 f"fields={sorted(str(key)[:32] for key in data)[:16]}, "
+                f"page_level={page_level if isinstance(page_level, int) else type(page_level).__name__}, "
+                f"second_required={bool(data.get('second'))}, "
+                f"modules={sorted(str(code)[:32] for code in modules)[:10] if isinstance(modules, list) else []}, "
                 f"data_type={type(nested).__name__}, "
                 f"data_fields={sorted(str(key)[:32] for key in nested)[:16] if isinstance(nested, dict) else []})"
             )
