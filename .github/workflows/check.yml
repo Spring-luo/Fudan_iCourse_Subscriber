@@ -166,6 +166,7 @@ jobs:
         env:
           StuId: ${{ secrets.STUID }}
           UISPsw: ${{ secrets.UISPSW }}
+          UIS_TOTP_SECRET: ${{ secrets.UIS_TOTP_SECRET }}
           COURSE_IDS: ${{ secrets.COURSE_IDS }},38488
           # Try video audio first, then official subtitles if audio fails.
           USE_OFFICIAL_TRANSCRIPT: "1"

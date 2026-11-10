@@ -7,6 +7,7 @@ Handles:
 """
 
 import html as html_mod
+import os
 import re
 from binascii import hexlify, unhexlify
 from urllib.parse import urlparse, urlencode, quote, urljoin
@@ -16,6 +17,7 @@ from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 import base64
+import pyotp
 
 from src.runtime import config
 
@@ -37,6 +39,60 @@ def _login_token_or_raise(data: dict, service: str) -> str:
             "(TOTP, email, SMS, or QR). Password retries cannot complete it."
         )
     raise RuntimeError(f"No loginToken in {service} response")
+
+
+def _totp_challenge_payload(data: dict, password_payload: dict) -> dict:
+    """Build the second IDP authExecute request without logging OTP data."""
+    modules = data.get("moduleCodes") or []
+    if "userAndOtp" not in modules:
+        raise SecondFactorRequiredError("UIS did not offer TOTP for this login")
+    request_number = data.get("requestNumber")
+    if request_number is None:
+        raise SecondFactorRequiredError("UIS did not return an MFA request number")
+    secret = "".join(os.environ.get("UIS_TOTP_SECRET", "").split())
+    if not secret:
+        raise SecondFactorRequiredError(
+            "UIS requires TOTP; add UIS_TOTP_SECRET to this repository's Actions Secrets"
+        )
+    try:
+        otp_code = pyotp.TOTP(secret).now()
+    except Exception:
+        raise SecondFactorRequiredError(
+            "UIS_TOTP_SECRET must be the authenticator's Base32 setup key"
+        ) from None
+    return {
+        "authModuleCode": "userAndOtp",
+        "authChainCode": data.get("authChainCode") or password_payload["authChainCode"],
+        "entityId": password_payload["entityId"],
+        "requestType": password_payload["requestType"],
+        "lck": password_payload["lck"],
+        "requestNumber": request_number,
+        "authPara": {
+            "loginName": password_payload["authPara"]["loginName"],
+            "otpCode": otp_code,
+            "verifyCode": "",
+        },
+    }
+
+
+def _complete_password_auth(session: requests.Session, data: dict,
+                            password_payload: dict, url: str,
+                            headers: dict, service: str) -> str:
+    if str(data.get("code")) != "200":
+        raise RuntimeError(f"{service} password authentication failed")
+    if data.get("loginToken"):
+        return str(data["loginToken"])
+    if str(data.get("pageLevelNo")) != "2" and not data.get("second"):
+        return _login_token_or_raise(data, service)
+    challenge = _totp_challenge_payload(data, password_payload)
+    response = session.post(url, json=challenge, headers=headers, timeout=60)
+    response.raise_for_status()
+    result = response.json()
+    if str(result.get("code")) != "200" or not result.get("loginToken"):
+        raise SecondFactorRequiredError(
+            f"{service} TOTP was rejected; check the setup key and runner clock"
+        )
+    return str(result["loginToken"])
 
 
 def encrypt_host(hostname: str) -> str:
@@ -305,24 +361,21 @@ class WebVPNSession:
                 "verifyCode": "",
             },
         }
+        headers = {
+            "Content-Type": "application/json",
+            "Referer": f"{idp_vpn_base}/ac/",
+            "Origin": config.WEBVPN_BASE,
+        }
         resp = self.session.post(
             url,
             json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Referer": f"{idp_vpn_base}/ac/",
-                "Origin": config.WEBVPN_BASE,
-            },
+            headers=headers,
             timeout=60,
         )
         data = resp.json()
-
-        if str(data.get("code")) != "200":
-            raise RuntimeError(
-                f"iCourse CAS auth failed (code={data.get('code')})"
-            )
-
-        login_token = _login_token_or_raise(data, "iCourse CAS")
+        login_token = _complete_password_auth(
+            self.session, data, payload, url, headers, "iCourse CAS",
+        )
         print("    loginToken: OK")
 
         # Step 6: Get CAS ticket (through WebVPN)
@@ -527,24 +580,21 @@ class WebVPNSession:
                 "verifyCode": "",
             },
         }
+        headers = {
+            "Content-Type": "application/json",
+            "Referer": f"{config.IDP_BASE}/ac/",
+            "Origin": config.IDP_BASE,
+        }
         resp = self.session.post(
             url,
             json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Referer": f"{config.IDP_BASE}/ac/",
-                "Origin": config.IDP_BASE,
-            },
+            headers=headers,
             timeout=60,
         )
         data = resp.json()
-
-        if str(data.get("code")) != "200":
-            raise RuntimeError(
-                f"Authentication failed (code={data.get('code')})"
-            )
-
-        login_token = _login_token_or_raise(data, "WebVPN CAS")
+        login_token = _complete_password_auth(
+            self.session, data, payload, url, headers, "WebVPN CAS",
+        )
 
         print("    loginToken: OK")
         return login_token

@@ -35,6 +35,7 @@
 |---|---|---|---|
 | `STUID` | ✅ | 复旦学号 | `22307110000` |
 | `UISPSW` | ✅ | UIS 统一身份认证密码 | `your_password` |
+| `UIS_TOTP_SECRET` | 二次认证时必填 | UIS动态口令绑定时显示的Base32设置密钥；不要填写当前6位验证码 | 不要写在文档中 |
 | `COURSE_IDS` | ✅ | 要监控的课程 ID，多个用英文逗号分隔 | `35472,30251` |
 | `DASHSCOPE_API_KEY` | ⬜ | ModelScope 平台 API Key | `ms-xxxxxxxx` |
 | `SHUSHENG_API_KEY` | ⬜ | 书生·端砚API Key | `your-api-key` |
